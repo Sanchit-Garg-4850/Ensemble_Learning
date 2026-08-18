@@ -25,6 +25,13 @@ from config import TIERS  # noqa: E402
 OUTPUT_DIR = ROOT / "output"
 SHADOW_CAPABLE_MODELS = set(TIERS["tier1_single"]) | set(TIERS["tier2_ensemble"])
 
+
+def artifact_path(relative_path):
+    """Resolve artifact paths regardless of Windows/Linux path separators."""
+    if not relative_path:
+        return None
+    return ROOT / Path(str(relative_path).replace("\\", "/"))
+
 st.set_page_config(page_title="Fraud Detection — Ensemble Showcase", layout="wide")
 
 
@@ -69,7 +76,7 @@ with tab_compare:
 
     oob_rows = []
     for name, info in manifest["models"].items():
-        result_path = ROOT / info["result"]
+        result_path = artifact_path(info["result"])
         result = json.loads(result_path.read_text())
         if result.get("oob_score") is not None:
             oob_rows.append({"model": name, "oob_score": result["oob_score"]})
@@ -176,7 +183,7 @@ with tab_threshold:
     if proba_path is None:
         st.warning("No cached probabilities for this model yet.")
     else:
-        proba = np.load(ROOT / proba_path)
+        proba = np.load(artifact_path(proba_path))
         y_true = test_df["Class"].values
         threshold = st.slider("Decision threshold", 0.0, 1.0, 0.5, 0.01)
         pred = (proba >= threshold).astype(int)
