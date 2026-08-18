@@ -1,8 +1,10 @@
 """
-Streamlit app — reads only output/app_manifest.json + cached artifacts.
+Streamlit app — reads cached artifacts from output/.
 Run: streamlit run app/streamlit_app.py
-Everything here is offline-cached; nothing retrains on toggle except the
-explicitly-labeled "quick estimate" fallback for novel feature pairs.
+
+The comparison and threshold tabs use cached artifacts only.
+The decision-surface tab optionally fits a small illustrative shadow model
+when output/train.parquet is available.
 """
 import json
 import sys
@@ -77,35 +79,95 @@ with tab_compare:
 
 with tab_surface:
     st.subheader("Live decision surface")
-    surface_models = [m for m in manifest["models"] if m in SHADOW_CAPABLE_MODELS]
-    col1, col2, col3 = st.columns(3)
-    model_name = col1.selectbox("Model", surface_models,
-                                 help="Voting/Stacking aren't shown here — a shadow 2D surface "
-                                      "needs one tunable model, not an ensemble-of-models.")
-    feature_cols = [c for c in test_df.columns if c != "Class"]
-    fx = col2.selectbox("Feature X", feature_cols, index=feature_cols.index("V14") if "V14" in feature_cols else 0)
-    fy = col3.selectbox("Feature Y", feature_cols, index=feature_cols.index("V17") if "V17" in feature_cols else 1)
 
-    st.caption("Shadow model: same model class + tuned hyperparams, refit on just these 2 features "
-               "on a stratified subsample — illustrative, not the production 30-feature model.")
+    train_path = OUTPUT_DIR / "train.parquet"
 
-    surface = get_or_build_surface(model_name, fx, fy)
-    fig = go.Figure(data=go.Contour(
-        x=surface["xx"][0], y=surface["yy"][:, 0], z=surface["proba"],
-        colorscale="RdBu_r", opacity=0.7, showscale=True,
-    ))
-    pts = surface["points"]
-    labels = surface["labels"]
-    fig.add_trace(go.Scatter(
-        x=pts[labels == 0, 0], y=pts[labels == 0, 1], mode="markers",
-        marker=dict(size=4, color="steelblue"), name="normal",
-    ))
-    fig.add_trace(go.Scatter(
-        x=pts[labels == 1, 0], y=pts[labels == 1, 1], mode="markers",
-        marker=dict(size=6, color="crimson", symbol="x"), name="fraud",
-    ))
-    fig.update_layout(xaxis_title=fx, yaxis_title=fy, height=550)
-    st.plotly_chart(fig, use_container_width=True)
+    if not train_path.exists():
+        st.info(
+            "The live decision-surface tab is disabled in this deployment because "
+            "`output/train.parquet` is not included. The model comparison and "
+            "threshold tuning tabs remain fully available from cached test-set artifacts."
+        )
+    else:
+        surface_models = [m for m in manifest["models"] if m in SHADOW_CAPABLE_MODELS]
+
+        if not surface_models:
+            st.warning("No shadow-capable models are available for the decision surface.")
+        else:
+            col1, col2, col3 = st.columns(3)
+
+            model_name = col1.selectbox(
+                "Model",
+                surface_models,
+                help=(
+                    "Voting/Stacking aren't shown here — a shadow 2D surface "
+                    "needs one tunable model, not an ensemble-of-models."
+                ),
+            )
+
+            feature_cols = [c for c in test_df.columns if c != "Class"]
+
+            fx = col2.selectbox(
+                "Feature X",
+                feature_cols,
+                index=feature_cols.index("V14") if "V14" in feature_cols else 0,
+            )
+
+            fy = col3.selectbox(
+                "Feature Y",
+                feature_cols,
+                index=feature_cols.index("V17") if "V17" in feature_cols else 1,
+            )
+
+            st.caption(
+                "Shadow model: same model class + tuned hyperparams, refit on just "
+                "these 2 features on a stratified subsample — illustrative, not "
+                "the production 30-feature model."
+            )
+
+            surface = get_or_build_surface(model_name, fx, fy)
+
+            fig = go.Figure(
+                data=go.Contour(
+                    x=surface["xx"][0],
+                    y=surface["yy"][:, 0],
+                    z=surface["proba"],
+                    colorscale="RdBu_r",
+                    opacity=0.7,
+                    showscale=True,
+                )
+            )
+
+            pts = surface["points"]
+            labels = surface["labels"]
+
+            fig.add_trace(
+                go.Scatter(
+                    x=pts[labels == 0, 0],
+                    y=pts[labels == 0, 1],
+                    mode="markers",
+                    marker=dict(size=4, color="steelblue"),
+                    name="normal",
+                )
+            )
+
+            fig.add_trace(
+                go.Scatter(
+                    x=pts[labels == 1, 0],
+                    y=pts[labels == 1, 1],
+                    mode="markers",
+                    marker=dict(size=6, color="crimson", symbol="x"),
+                    name="fraud",
+                )
+            )
+
+            fig.update_layout(
+                xaxis_title=fx,
+                yaxis_title=fy,
+                height=550,
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
 
 with tab_threshold:
     st.subheader("Threshold tuning (instant — recomputed from cached probabilities)")
