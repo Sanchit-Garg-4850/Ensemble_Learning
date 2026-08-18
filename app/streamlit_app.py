@@ -76,7 +76,7 @@ with tab_compare:
 
     oob_rows = []
     for name, info in manifest["models"].items():
-        result_path = artifact_path(info["result"])
+        result_path = ROOT / Path(info["result"].replace("\\", "/"))
         result = json.loads(result_path.read_text())
         if result.get("oob_score") is not None:
             oob_rows.append({"model": name, "oob_score": result["oob_score"]})
@@ -183,7 +183,7 @@ with tab_threshold:
     if proba_path is None:
         st.warning("No cached probabilities for this model yet.")
     else:
-        proba = np.load(artifact_path(proba_path))
+        proba = np.load(ROOT / Path(proba_path.replace("\\", "/")))
         y_true = test_df["Class"].values
         threshold = st.slider("Decision threshold", 0.0, 1.0, 0.5, 0.01)
         pred = (proba >= threshold).astype(int)
