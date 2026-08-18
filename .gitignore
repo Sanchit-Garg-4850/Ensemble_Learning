@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Dataset is large + comes from Kaggle under their license — don't commit it
+data/creditcard.csv
+
+# Generated artifacts — reproducible via `make pipeline`, don't commit
+output/*
+!output/.gitkeep
+models/*
+!models/.gitkeep
+
+.ipynb_checkpoints/
+*.egg-info/
+.DS_Store

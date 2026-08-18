@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_full_training:
+        description: "Run full training on the real dataset (requires self-hosted runner + data/creditcard.csv present)"
+        type: boolean
+        default: false
+
+jobs:
+  lint-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint
+        run: python -m flake8 src app tests --max-line-length=120 --extend-ignore=E203
+
+      # Runs the whole pipeline end-to-end against the tiny committed
+      # synthetic fixture (tests/fixtures/sample.csv, 420 rows, 2 Optuna
+      # trials, 2 CV folds). Catches broken imports / API drift on every
+      # PR in under a couple of minutes without needing the real dataset
+      # or any API key.
+      - name: Pipeline smoke test
+        run: python -m pytest tests -v
+
+      - name: Upload smoke-test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-output
+          path: |
+            output/pipeline_state.json
+            output/model_comparison.csv
+          if-no-files-found: ignore
+
+  # Full training is NOT run on GitHub-hosted free runners: ~285K rows x
+  # 7 models x N_TRIALS Optuna trials x 5-fold CV would blow the 6h job
+  # limit. Point `runs-on` at a self-hosted runner with the real
+  # data/creditcard.csv present (or fetch it from a private artifact
+  # store you control) and trigger manually via workflow_dispatch.
+  full-training:
+    if: github.event.inputs.run_full_training == 'true'
+    runs-on: self-hosted
+    needs: lint-and-smoke
+    steps:
+      - uses: actions/checkout@v4
+      - name: Full pipeline run
+        run: |
+          pip install -r requirements.txt
+          make pipeline-force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trained-models
+          path: |
+            models/
+            output/model_comparison.csv
+            output/shap_summary.png
