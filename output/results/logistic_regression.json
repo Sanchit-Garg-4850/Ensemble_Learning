@@ -1,0 +1,22 @@
+{
+  "model": "logistic_regression",
+  "best_params": {
+    "resampler": "none",
+    "lr_C": 0.2885467446545792
+  },
+  "cv_pr_auc": 0.756085671698535,
+  "worst_trial_params": {
+    "resampler": "random_under",
+    "lr_C": 1.1370862318544206
+  },
+  "worst_trial_cv_pr_auc": 0.61119458637854,
+  "test_metrics": {
+    "pr_auc": 0.6768083079818262,
+    "roc_auc": 0.9626226693633875,
+    "f1": 0.10407523510971786,
+    "precision": 0.05533333333333333,
+    "recall": 0.8736842105263158
+  },
+  "oob_score": null,
+  "train_seconds": 8005.6
+}

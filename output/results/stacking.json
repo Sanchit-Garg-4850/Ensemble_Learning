@@ -1,0 +1,16 @@
+{
+  "model": "stacking",
+  "base_models": [
+    "xgboost",
+    "lightgbm",
+    "random_forest",
+    "bagging"
+  ],
+  "test_metrics": {
+    "pr_auc": 0.7510376459576005,
+    "roc_auc": 0.9725701873613974,
+    "f1": 0.17945945945945946,
+    "precision": 0.1,
+    "recall": 0.8736842105263158
+  }
+}

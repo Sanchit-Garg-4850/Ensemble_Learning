@@ -1,0 +1,24 @@
+{
+  "model": "bagging",
+  "best_params": {
+    "resampler": "none",
+    "bag_n_estimators": 83,
+    "bag_max_samples": 0.8257082780989491
+  },
+  "cv_pr_auc": 0.8281809087226151,
+  "worst_trial_params": {
+    "resampler": "random_under",
+    "bag_n_estimators": 94,
+    "bag_max_samples": 0.9160574490618731
+  },
+  "worst_trial_cv_pr_auc": 0.5803660395237913,
+  "test_metrics": {
+    "pr_auc": 0.7661069089140473,
+    "roc_auc": 0.9092801817963913,
+    "f1": 0.8165680473372781,
+    "precision": 0.9324324324324325,
+    "recall": 0.7263157894736842
+  },
+  "oob_score": 0.9995946779451934,
+  "train_seconds": 16643.8
+}

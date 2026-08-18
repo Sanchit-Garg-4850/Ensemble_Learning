@@ -1,0 +1,66 @@
+{
+  "models": {
+    "decision_tree": {
+      "tier": "tier1_single",
+      "result": "output\\results\\decision_tree.json",
+      "model": "models\\decision_tree.joblib",
+      "test_proba": "output\\results\\decision_tree_test_proba.npy"
+    },
+    "logistic_regression": {
+      "tier": "tier1_single",
+      "result": "output\\results\\logistic_regression.json",
+      "model": "models\\logistic_regression.joblib",
+      "test_proba": "output\\results\\logistic_regression_test_proba.npy"
+    },
+    "knn": {
+      "tier": "tier1_single",
+      "result": "output\\results\\knn.json",
+      "model": "models\\knn.joblib",
+      "test_proba": "output\\results\\knn_test_proba.npy"
+    },
+    "random_forest": {
+      "tier": "tier2_ensemble",
+      "result": "output\\results\\random_forest.json",
+      "model": "models\\random_forest.joblib",
+      "test_proba": "output\\results\\random_forest_test_proba.npy"
+    },
+    "bagging": {
+      "tier": "tier2_ensemble",
+      "result": "output\\results\\bagging.json",
+      "model": "models\\bagging.joblib",
+      "test_proba": "output\\results\\bagging_test_proba.npy"
+    },
+    "adaboost": {
+      "tier": "tier2_ensemble",
+      "result": "output\\results\\adaboost.json",
+      "model": "models\\adaboost.joblib",
+      "test_proba": "output\\results\\adaboost_test_proba.npy"
+    },
+    "xgboost": {
+      "tier": "tier2_ensemble",
+      "result": "output\\results\\xgboost.json",
+      "model": "models\\xgboost.joblib",
+      "test_proba": "output\\results\\xgboost_test_proba.npy"
+    },
+    "lightgbm": {
+      "tier": "tier2_ensemble",
+      "result": "output\\results\\lightgbm.json",
+      "model": "models\\lightgbm.joblib",
+      "test_proba": "output\\results\\lightgbm_test_proba.npy"
+    },
+    "voting": {
+      "tier": "tier3_meta",
+      "result": "output\\results\\voting.json",
+      "model": "models\\voting.joblib",
+      "test_proba": "output\\results\\voting_test_proba.npy"
+    },
+    "stacking": {
+      "tier": "tier3_meta",
+      "result": "output\\results\\stacking.json",
+      "model": "models\\stacking.joblib",
+      "test_proba": "output\\results\\stacking_test_proba.npy"
+    }
+  },
+  "comparison_csv": "model_comparison.csv",
+  "shap_summary": "shap_summary.png"
+}

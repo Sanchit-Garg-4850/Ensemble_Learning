@@ -1,0 +1,16 @@
+{
+  "model": "voting",
+  "base_models": [
+    "xgboost",
+    "lightgbm",
+    "random_forest",
+    "bagging"
+  ],
+  "test_metrics": {
+    "pr_auc": 0.8188528076211408,
+    "roc_auc": 0.971929329068377,
+    "f1": 0.8304093567251462,
+    "precision": 0.9342105263157895,
+    "recall": 0.7473684210526316
+  }
+}
