@@ -20,9 +20,9 @@ from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 from decision_surfaces import get_or_build_surface  # noqa: E402
-from config import TIERS  # noqa: E402
+from config import TIERS, OUTPUT_DIR as _OUTPUT_DIR, RUN_VERSION  # noqa: E402
 
-OUTPUT_DIR = ROOT / "output"
+OUTPUT_DIR = _OUTPUT_DIR
 SHADOW_CAPABLE_MODELS = set(TIERS["tier1_single"]) | set(TIERS["tier2_ensemble"])
 
 
@@ -32,20 +32,47 @@ def artifact_path(relative_path):
         return None
     return ROOT / Path(str(relative_path).replace("\\", "/"))
 
+
+def discover_run_versions():
+    """Find every run version that has a manifest, e.g. ['v1', 'v2'], newest last."""
+    versions = sorted(
+        p.stem.replace("app_manifest_", "")
+        for p in OUTPUT_DIR.glob("app_manifest_*.json")
+    )
+    return versions
+
+
 st.set_page_config(page_title="Fraud Detection — Ensemble Showcase", layout="wide")
+
+available_versions = discover_run_versions()
+if not available_versions:
+    st.error(
+        "No `output/app_manifest_<version>.json` found for any run. "
+        "Run the pipeline first: `make pipeline` (or your training entry point)."
+    )
+    st.stop()
+
+default_idx = available_versions.index(RUN_VERSION) if RUN_VERSION in available_versions else len(available_versions) - 1
+selected_version = st.sidebar.selectbox(
+    "Experiment version",
+    available_versions,
+    index=default_idx,
+    help="Each version is a separate tuning run — e.g. v1 = original search space, "
+         "v2 = regularized search space. Switch here to compare before/after.",
+)
 
 
 @st.cache_data
-def load_manifest():
-    path = OUTPUT_DIR / "app_manifest.json"
+def load_manifest(version):
+    path = OUTPUT_DIR / f"app_manifest_{version}.json"
     if not path.exists():
         return None
     return json.loads(path.read_text())
 
 
 @st.cache_data
-def load_comparison():
-    return pd.read_csv(OUTPUT_DIR / "model_comparison.csv")
+def load_comparison(version):
+    return pd.read_csv(OUTPUT_DIR / f"model_comparison_{version}.csv")
 
 
 @st.cache_data
@@ -53,17 +80,20 @@ def load_test_set():
     return pd.read_parquet(OUTPUT_DIR / "test.parquet")
 
 
-manifest = load_manifest()
+manifest = load_manifest(selected_version)
 if manifest is None:
-    st.error("No `output/app_manifest.json` found. Run the pipeline first: `make pipeline`.")
+    st.error(f"No manifest found for version '{selected_version}'.")
     st.stop()
 
-comparison = load_comparison()
+comparison = load_comparison(selected_version)
 test_df = load_test_set()
 
 st.title("Fraud Detection — Ensemble Learning Showcase")
-st.caption("Weak learners → bagging/boosting → stacking. All metrics come from a held-out test set; "
-           "V1–V28 are anonymized PCA components from the original bank data.")
+st.caption(
+    f"Viewing experiment **{selected_version}**. Weak learners → bagging/boosting → stacking. "
+    f"All metrics come from a held-out test set; V1–V28 are anonymized PCA components "
+    f"from the original bank data."
+)
 
 tab_compare, tab_surface, tab_threshold = st.tabs(
     ["Model comparison", "Decision surface", "Threshold tuning"]
@@ -129,19 +159,25 @@ with tab_surface:
             st.caption(
                 "Shadow model: same model class + tuned hyperparams, refit on just "
                 "these 2 features on a stratified subsample — illustrative, not "
-                "the production 30-feature model."
+                "the production 30-feature model. Boundary shown is the model's "
+                "hard predicted class (0/1), not a probability gradient."
             )
 
-            surface = get_or_build_surface(model_name, fx, fy)
+            try:
+                surface = get_or_build_surface(model_name, fx, fy, version=selected_version)
+            except ValueError as e:
+                st.error(str(e))
+                st.stop()
 
             fig = go.Figure(
                 data=go.Contour(
                     x=surface["xx"][0],
                     y=surface["yy"][:, 0],
-                    z=surface["proba"],
-                    colorscale="RdBu_r",
-                    opacity=0.7,
-                    showscale=True,
+                    z=surface["pred"],
+                    colorscale=[[0, "steelblue"], [1, "crimson"]],
+                    opacity=0.5,
+                    showscale=False,
+                    contours=dict(start=0, end=1, size=1),
                 )
             )
 
