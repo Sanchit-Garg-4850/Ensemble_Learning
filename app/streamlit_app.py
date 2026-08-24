@@ -10,7 +10,6 @@ import json
 import sys
 from pathlib import Path
 
-import joblib
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
@@ -19,8 +18,8 @@ from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
-from decision_surfaces import get_or_build_surface  # noqa: E402
-from config import TIERS, OUTPUT_DIR as _OUTPUT_DIR, RUN_VERSION  # noqa: E402
+from decision_surfaces import get_or_build_surface
+from config import TIERS, OUTPUT_DIR as _OUTPUT_DIR, RUN_VERSION
 
 OUTPUT_DIR = _OUTPUT_DIR
 SHADOW_CAPABLE_MODELS = set(TIERS["tier1_single"]) | set(TIERS["tier2_ensemble"])
@@ -52,7 +51,11 @@ if not available_versions:
     )
     st.stop()
 
-default_idx = available_versions.index(RUN_VERSION) if RUN_VERSION in available_versions else len(available_versions) - 1
+default_idx = (
+    available_versions.index(RUN_VERSION)
+    if RUN_VERSION in available_versions
+    else len(available_versions) - 1
+)
 selected_version = st.sidebar.selectbox(
     "Experiment version",
     available_versions,
@@ -256,3 +259,4 @@ with tab_threshold:
         c3.metric("F1", f"{f1_score(y_true, pred, zero_division=0):.3f}")
         st.write("Confusion matrix (rows=actual, cols=predicted)")
         st.dataframe(pd.DataFrame(cm, index=["normal", "fraud"], columns=["pred_normal", "pred_fraud"]))
+        
