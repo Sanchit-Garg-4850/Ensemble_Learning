@@ -14,11 +14,37 @@ or just bump the default below and don't set the env var.
 Preprocessing artifacts (PROCESSED_DATA_PATH, train.parquet, test.parquet) are
 NOT versioned — they're shared across experiments since regularization changes
 don't touch the data split/scaling stage.
+
+--- MLflow ---
+Optuna's own SQLite DB (OPTUNA_STORAGE below) already tracks every individual
+hyperparameter trial. MLflow sits alongside it at a coarser grain: one run per
+FINAL model result (best trial refit + test metrics + the model artifact
+itself), giving a browsable dashboard instead of grepping output/results/*.json.
+
+MLFLOW_TRACKING_URI defaults to a LOCAL file store (./mlruns, gitignored) --
+fine for solo local runs, but invisible to GitHub Actions since mlruns/ is
+never pushed. Set the MLFLOW_TRACKING_URI env var to a shared server (e.g. a
+DagsHub repo's MLflow endpoint: https://dagshub.com/<user>/<repo>.mlflow) so
+local training and CI both log to -- and can query -- the same place. DagsHub
+also needs MLFLOW_TRACKING_USERNAME / MLFLOW_TRACKING_PASSWORD in the
+environment; mlflow's client reads those automatically, no code needed here.
 """
 import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+# Loads variables from a .env file at the project root (gitignored --
+# MLFLOW_TRACKING_URI / USERNAME / PASSWORD live there) into the actual
+# environment, so `set FRAUD_RUN_VERSION=v2` etc. still work as one-off
+# overrides, but the DagsHub credentials don't need to be retyped every
+# cmd session. Safe if python-dotenv isn't installed or .env doesn't
+# exist yet -- just silently skips loading anything.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(ROOT / ".env")
+except ImportError:
+    pass
 
 DATA_DIR = ROOT / "data"
 OUTPUT_DIR = ROOT / "output"
@@ -51,9 +77,17 @@ RESAMPLERS = [
     "random_under",
     "smote",
     "adasyn",
-    "smotetomek",
-    "smoteenn",
 ]
+
+TRIAL_TIMEOUT_SECONDS = {
+    "decision_tree": 180,
+    "logistic_regression": 360,
+    "knn": 360,
+    "random_forest": 600,
+    "adaboost": 600,
+    "xgboost": 600,
+    "lightgbm": 600,
+}
 
 # ---------------------------------------------------------------------------
 # Experiment / run versioning
@@ -101,6 +135,16 @@ def proba_path(model_name: str, version: str = None) -> Path:
 
 COMPARISON_CSV_PATH = OUTPUT_DIR / f"model_comparison_{RUN_VERSION}.csv"
 APP_MANIFEST_PATH = OUTPUT_DIR / f"app_manifest_{RUN_VERSION}.json"
+
+# ---------------------------------------------------------------------------
+# MLflow tracking
+# ---------------------------------------------------------------------------
+MLFLOW_TRACKING_DIR = ROOT / "mlruns"  # local fallback only (gitignored, single-machine)
+
+# Env var wins (e.g. DagsHub URL) -- falls back to the local file store,
+# which works for solo local runs but is invisible to CI.
+MLFLOW_TRACKING_URI = os.environ.get("MLFLOW_TRACKING_URI", MLFLOW_TRACKING_DIR.as_uri())
+MLFLOW_EXPERIMENT_NAME = os.environ.get("FRAUD_MLFLOW_EXPERIMENT", "fraud-detection-ensemble")
 
 for d in (DATA_DIR, OUTPUT_DIR, MODELS_DIR, RESULTS_DIR, SURFACES_DIR, OUTPUT_DIR / "probas"):
     d.mkdir(parents=True, exist_ok=True)

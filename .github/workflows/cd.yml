@@ -1,0 +1,53 @@
+name: CD - Deploy if Better
+
+# Push your local training results to the "candidate" branch (not main).
+# This workflow compares the candidate's best PR-AUC against whatever is
+# currently recorded as live on main (best_score.json). If the candidate
+# wins, it's merged into main -- which Streamlit Community Cloud watches
+# and will auto-redeploy from. If not, nothing happens: main is untouched
+# and no redeploy occurs.
+#
+# MLFLOW_TRACKING_URI / MLFLOW_TRACKING_USERNAME / MLFLOW_TRACKING_PASSWORD
+# must be set as repo secrets, pointing at a SHARED mlflow server (e.g. a
+# DagsHub repo's MLflow endpoint) -- the same one your local training run
+# used. Without these, compare_and_deploy.py's model-registry promotion
+# step will still run the deploy fine, it'll just skip the registry part
+# (it can't see a local-only ./mlruns store from this runner).
+
+on:
+  push:
+    branches:
+      - candidate
+
+permissions:
+  contents: write
+
+jobs:
+  evaluate-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+      MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install comparison dependencies
+        run: pip install pandas mlflow
+
+      - name: Compare candidate vs main, deploy if better
+        run: python src/compare_and_deploy.py

@@ -77,7 +77,10 @@ def load_comparison(version):
 
 @st.cache_data
 def load_test_set():
-    return pd.read_parquet(OUTPUT_DIR / "test.parquet")
+    test_path = OUTPUT_DIR / "test.parquet"
+    if not test_path.exists():
+        return None
+    return pd.read_parquet(test_path)
 
 
 manifest = load_manifest(selected_version)
@@ -87,6 +90,14 @@ if manifest is None:
 
 comparison = load_comparison(selected_version)
 test_df = load_test_set()
+if test_df is None:
+    st.error(
+        f"`output/test.parquet` is not present in this deployment, so the app "
+        f"can't compute confusion matrices or threshold metrics for version "
+        f"'{selected_version}'. Every tab depends on this file — make sure it "
+        f"was committed alongside the model artifacts."
+    )
+    st.stop()
 
 st.title("Fraud Detection — Ensemble Learning Showcase")
 st.caption(
@@ -104,9 +115,24 @@ with tab_compare:
     st.dataframe(comparison.style.format({c: "{:.4f}" for c in comparison.columns if c != "model" and c != "tier"}))
     st.bar_chart(comparison.set_index("model")[["pr_auc", "roc_auc", "f1"]])
 
+    if "pr_auc_gap" in comparison.columns:
+        st.subheader("Train vs. test PR-AUC (overfitting check)")
+        st.caption(
+            "Gap = train PR-AUC − test PR-AUC. Near-zero or negative is healthy; "
+            "a large positive gap means the model is fitting noise in training "
+            "data that doesn't generalize to the held-out test set."
+        )
+        gap_df = comparison[["model", "train_pr_auc", "pr_auc", "pr_auc_gap"]].rename(
+            columns={"pr_auc": "test_pr_auc"}
+        )
+        st.dataframe(gap_df.style.format({c: "{:.4f}" for c in ["train_pr_auc", "test_pr_auc", "pr_auc_gap"]}))
+        st.bar_chart(gap_df.set_index("model")[["train_pr_auc", "test_pr_auc"]])
+
     oob_rows = []
     for name, info in manifest["models"].items():
         result_path = ROOT / Path(info["result"].replace("\\", "/"))
+        if not result_path.exists():
+            continue
         result = json.loads(result_path.read_text())
         if result.get("oob_score") is not None:
             oob_rows.append({"model": name, "oob_score": result["oob_score"]})

@@ -2,7 +2,13 @@
 Smoke tests: run each pipeline stage against the tiny synthetic fixture
 (tests/fixtures/sample.csv, 420 rows) to catch import errors, API
 mismatches, and broken paths fast in CI. These do NOT validate model
-quality — that's the job of the real local run against the full dataset.
+quality -- that's the job of the real local run against the full dataset.
+
+Versioning: forced to FRAUD_RUN_VERSION="smoketest" so CI's throwaway
+artifacts never collide with your real local v1/v2 (etc.) experiment
+files, and never accidentally get picked up as a CD deploy candidate --
+compare_and_deploy.py globs "model_comparison_v*.csv" on purpose, which
+"model_comparison_smoketest.csv" doesn't match.
 """
 import os
 import sys
@@ -14,6 +20,7 @@ sys.path.insert(0, str(ROOT / "src"))
 os.environ["FRAUD_DATA_PATH"] = str(ROOT / "tests" / "fixtures" / "sample.csv")
 os.environ["FRAUD_N_TRIALS"] = "2"
 os.environ["FRAUD_CV_FOLDS"] = "2"
+os.environ["FRAUD_RUN_VERSION"] = "smoketest"
 
 import importlib
 import config  # noqa: E402
@@ -45,10 +52,10 @@ def test_train_stage_tier1_only(monkeypatch):
     monkeypatch.setitem(cfg.TIERS, "tier3_meta", ["voting"])
     import train
     train.run()
-    assert (config.OUTPUT_DIR / "model_comparison.csv").exists()
+    assert config.COMPARISON_CSV_PATH.exists()
 
 
 def test_export_artifacts_stage():
     import export_artifacts
     export_artifacts.run()
-    assert (config.OUTPUT_DIR / "app_manifest.json").exists()
+    assert config.APP_MANIFEST_PATH.exists()

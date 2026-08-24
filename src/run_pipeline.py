@@ -3,10 +3,19 @@ Pipeline orchestrator.
 
 Runs the full stage sequence with checkpointing (skips a stage if its
 output marker already exists, unless --force or FRAUD_FORCE=1), logs
-timing per stage to output/pipeline_state.json, and exits non-zero on the
-first failure so CI can fail fast.
+timing per stage to output/pipeline_state_<RUN_VERSION>.json, and exits
+non-zero on the first failure so CI can fail fast.
+
+Versioning: checkpoint markers for RUN_VERSION-dependent stages (train,
+shap_explain, export_artifacts) are namespaced by RUN_VERSION, so re-running
+under a new FRAUD_RUN_VERSION won't skip a stage just because an OLDER
+version's output already exists. data_quality and preprocessing markers stay
+unversioned on purpose -- config.py's PROCESSED_DATA_PATH/train.parquet/
+test.parquet are intentionally shared across experiments (regularization
+changes don't touch the data split/scaling stage).
 
 Usage:
+    set FRAUD_RUN_VERSION=v2
     python src/run_pipeline.py                 # run all stages, resume from checkpoints
     python src/run_pipeline.py --force          # ignore checkpoints, rerun everything
     python src/run_pipeline.py --from train      # skip straight to a stage (assumes prior stages already ran)
@@ -20,18 +29,18 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from config import OUTPUT_DIR  # noqa: E402
+from config import OUTPUT_DIR, RUN_VERSION  # noqa: E402
 
-STATE_PATH = OUTPUT_DIR / "pipeline_state.json"
+STATE_PATH = OUTPUT_DIR / f"pipeline_state_{RUN_VERSION}.json"
 
-# stage_name -> (module, marker_file_relative_to_OUTPUT_DIR)
+# stage_name -> marker_file_relative_to_OUTPUT_DIR (None = always (re)run)
 STAGES = [
-    ("data_quality", "data_quality_report.json"),
-    ("preprocessing", "train.parquet"),
-    ("train", "model_comparison.csv"),
-    ("decision_surfaces", None),   # always cheap to (re)build cache on demand
-    ("shap_explain", "shap_summary.png"),
-    ("export_artifacts", "app_manifest.json"),
+    ("data_quality", "data_quality_report.json"),          # unversioned -- shared raw-data check
+    ("preprocessing", "train.parquet"),                    # unversioned -- shared across experiments
+    ("train", f"model_comparison_{RUN_VERSION}.csv"),
+    ("decision_surfaces", None),                            # always cheap to (re)build cache on demand
+    ("shap_explain", f"shap_summary_{RUN_VERSION}.png"),
+    ("export_artifacts", f"app_manifest_{RUN_VERSION}.json"),
 ]
 
 
@@ -50,10 +59,10 @@ def run_stage(name: str, force: bool, state: dict):
     marker_path = OUTPUT_DIR / marker if marker else None
 
     if not force and marker_path and marker_path.exists():
-        print(f"[orchestrator] SKIP {name} (checkpoint found: {marker})")
+        print(f"[orchestrator] SKIP {name} (checkpoint found: {marker}, run={RUN_VERSION})")
         return
 
-    print(f"[orchestrator] RUN {name} ...")
+    print(f"[orchestrator] RUN {name} (run={RUN_VERSION}) ...")
     t0 = time.time()
     module = importlib.import_module(name)
     try:
@@ -87,10 +96,10 @@ def main():
     else:
         to_run = names
 
-    print(f"[orchestrator] plan: {to_run}")
+    print(f"[orchestrator] run_version={RUN_VERSION} plan: {to_run}")
     for name in to_run:
         run_stage(name, args.force, state)
-    print("[orchestrator] pipeline complete.")
+    print(f"[orchestrator] pipeline complete (run={RUN_VERSION}).")
 
 
 if __name__ == "__main__":
