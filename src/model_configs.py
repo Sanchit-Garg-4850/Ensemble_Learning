@@ -114,7 +114,7 @@ def build_meta_model(name: str, base_estimators: list):
     if name == "stacking":
         return StackingClassifier(
             estimators=base_estimators,
-            final_estimator=LogisticRegression(max_iter=2000, class_weight="balanced",n_jobs=-1),
+            final_estimator=LogisticRegression(max_iter=2000, class_weight="balanced", n_jobs=-1),
             n_jobs=-1,
         )
     raise ValueError(f"Unknown meta model: {name}")

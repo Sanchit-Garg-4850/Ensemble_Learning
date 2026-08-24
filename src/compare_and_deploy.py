@@ -100,7 +100,7 @@ def deploy(candidate_best):
         print(f"[cd] merge into main failed:\n{merge.stdout}\n{merge.stderr}")
         sys.exit(1)
     run_git("push", "origin", "main")
-    print(f"[cd] deployed -- pushed to main, Streamlit Cloud will auto-redeploy.")
+    print("[cd] deployed -- pushed to main, Streamlit Cloud will auto-redeploy.")
 
 
 def register_best_model(candidate_best):

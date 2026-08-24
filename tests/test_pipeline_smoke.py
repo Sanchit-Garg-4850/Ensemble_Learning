@@ -22,7 +22,7 @@ os.environ["FRAUD_N_TRIALS"] = "2"
 os.environ["FRAUD_CV_FOLDS"] = "2"
 os.environ["FRAUD_RUN_VERSION"] = "smoketest"
 
-import importlib # noqa: E402
+import importlib  # noqa: E402
 import config  # noqa: E402
 
 
