@@ -1,0 +1,25 @@
+{
+  "model": "voting",
+  "run_version": "v3",
+  "base_models": [
+    "xgboost",
+    "lightgbm",
+    "bagging",
+    "random_forest"
+  ],
+  "train_metrics": {
+    "pr_auc": 1.0,
+    "roc_auc": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "test_metrics": {
+    "pr_auc": 0.8115998275711107,
+    "roc_auc": 0.977635550633658,
+    "f1": 0.8333333333333334,
+    "precision": 0.958904109589041,
+    "recall": 0.7368421052631579
+  },
+  "pr_auc_gap": 0.1884
+}

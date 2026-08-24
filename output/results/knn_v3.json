@@ -1,0 +1,34 @@
+{
+  "model": "knn",
+  "run_version": "v3",
+  "best_params": {
+    "resampler": "none",
+    "knn_k": 11,
+    "knn_weights": "uniform"
+  },
+  "cv_pr_auc": 0.7978255635269639,
+  "worst_trial_params": {
+    "resampler": "adasyn",
+    "adasyn_k_neighbors": 7,
+    "knn_k": 9,
+    "knn_weights": "distance"
+  },
+  "worst_trial_cv_pr_auc": 0.5921193738617012,
+  "train_metrics": {
+    "pr_auc": 0.9043779365904805,
+    "roc_auc": 0.9998300460509532,
+    "f1": 0.8392603129445235,
+    "precision": 0.9076923076923077,
+    "recall": 0.7804232804232805
+  },
+  "test_metrics": {
+    "pr_auc": 0.777557782306101,
+    "roc_auc": 0.9103040871671332,
+    "f1": 0.7852760736196319,
+    "precision": 0.9411764705882353,
+    "recall": 0.6736842105263158
+  },
+  "pr_auc_gap": 0.1268,
+  "oob_score": null,
+  "train_seconds": 4398.1
+}

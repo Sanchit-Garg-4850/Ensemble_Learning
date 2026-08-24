@@ -1,0 +1,35 @@
+{
+  "model": "adaboost",
+  "run_version": "v3",
+  "best_params": {
+    "resampler": "random_under",
+    "ada_base_max_depth": 1,
+    "ada_n_estimators": 253,
+    "ada_lr": 0.10500280399852065
+  },
+  "cv_pr_auc": 0.7412757219054267,
+  "worst_trial_params": {
+    "resampler": "random_over",
+    "ada_base_max_depth": 2,
+    "ada_n_estimators": 118,
+    "ada_lr": 0.205612808482669
+  },
+  "worst_trial_cv_pr_auc": 0.0,
+  "train_metrics": {
+    "pr_auc": 0.7573169279807827,
+    "roc_auc": 0.9906907790079607,
+    "f1": 0.16574051703309978,
+    "precision": 0.09119914916245679,
+    "recall": 0.9074074074074074
+  },
+  "test_metrics": {
+    "pr_auc": 0.6638782018116015,
+    "roc_auc": 0.9676764195178419,
+    "f1": 0.15701668302257116,
+    "precision": 0.08658008658008658,
+    "recall": 0.8421052631578947
+  },
+  "pr_auc_gap": 0.0934,
+  "oob_score": null,
+  "train_seconds": 2021.8
+}

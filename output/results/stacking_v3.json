@@ -1,0 +1,25 @@
+{
+  "model": "stacking",
+  "run_version": "v3",
+  "base_models": [
+    "xgboost",
+    "lightgbm",
+    "bagging",
+    "random_forest"
+  ],
+  "train_metrics": {
+    "pr_auc": 0.9994722195907815,
+    "roc_auc": 0.9999990543520609,
+    "f1": 0.11547273560409348,
+    "precision": 0.06127411249797374,
+    "recall": 1.0
+  },
+  "test_metrics": {
+    "pr_auc": 0.8069253539291836,
+    "roc_auc": 0.9774449096917507,
+    "f1": 0.09656777196044211,
+    "precision": 0.05110837438423645,
+    "recall": 0.8736842105263158
+  },
+  "pr_auc_gap": 0.1925
+}

@@ -1,0 +1,41 @@
+{
+  "model": "random_forest",
+  "run_version": "v3",
+  "best_params": {
+    "resampler": "adasyn",
+    "adasyn_k_neighbors": 10,
+    "rf_n_estimators": 238,
+    "rf_max_depth": 12,
+    "rf_min_samples_leaf": 10,
+    "rf_max_features": "log2",
+    "rf_max_samples": 0.6072531565096999
+  },
+  "cv_pr_auc": 0.8001471091208456,
+  "worst_trial_params": {
+    "resampler": "smote",
+    "smote_k_neighbors": 5,
+    "rf_n_estimators": 283,
+    "rf_max_depth": 8,
+    "rf_min_samples_leaf": 6,
+    "rf_max_features": 0.5,
+    "rf_max_samples": 0.6869433989326866
+  },
+  "worst_trial_cv_pr_auc": 0.0,
+  "train_metrics": {
+    "pr_auc": 0.9835989169277721,
+    "roc_auc": 0.9999701478792572,
+    "f1": 0.38969072164948454,
+    "precision": 0.24199743918053776,
+    "recall": 1.0
+  },
+  "test_metrics": {
+    "pr_auc": 0.7788431287164177,
+    "roc_auc": 0.9773202312589827,
+    "f1": 0.3278008298755187,
+    "precision": 0.2041343669250646,
+    "recall": 0.8315789473684211
+  },
+  "pr_auc_gap": 0.2048,
+  "oob_score": 0.9966238133696991,
+  "train_seconds": 5809.0
+}

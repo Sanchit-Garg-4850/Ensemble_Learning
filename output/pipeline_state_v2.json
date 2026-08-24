@@ -1,0 +1,14 @@
+{
+  "data_quality": {
+    "status": "success",
+    "seconds": 3.1
+  },
+  "preprocessing": {
+    "status": "success",
+    "seconds": 1.6
+  },
+  "train": {
+    "status": "failed",
+    "error": "CategoricalDistribution does not support dynamic value space."
+  }
+}

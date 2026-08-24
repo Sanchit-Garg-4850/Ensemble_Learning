@@ -1,0 +1,31 @@
+{
+  "model": "logistic_regression",
+  "run_version": "v3",
+  "best_params": {
+    "resampler": "random_over",
+    "lr_C": 0.02350576440527217
+  },
+  "cv_pr_auc": 0.7560874510925022,
+  "worst_trial_params": {
+    "resampler": "random_under",
+    "lr_C": 0.0011682007529612167
+  },
+  "worst_trial_cv_pr_auc": 0.0,
+  "train_metrics": {
+    "pr_auc": 0.7423305580118804,
+    "roc_auc": 0.9894086963839217,
+    "f1": 0.11471074380165289,
+    "precision": 0.06117771509167842,
+    "recall": 0.917989417989418
+  },
+  "test_metrics": {
+    "pr_auc": 0.6688352501990271,
+    "roc_auc": 0.963037304121542,
+    "f1": 0.10526315789473684,
+    "precision": 0.05600539811066127,
+    "recall": 0.8736842105263158
+  },
+  "pr_auc_gap": 0.0735,
+  "oob_score": null,
+  "train_seconds": 6556.8
+}

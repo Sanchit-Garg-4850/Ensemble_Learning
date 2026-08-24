@@ -1,0 +1,67 @@
+{
+  "run_version": "v3",
+  "models": {
+    "decision_tree": {
+      "tier": "tier1_single",
+      "result": "output/results/decision_tree_v3.json",
+      "model": "models/decision_tree_v3.joblib",
+      "test_proba": "output/probas/decision_tree_v3.npy"
+    },
+    "logistic_regression": {
+      "tier": "tier1_single",
+      "result": "output/results/logistic_regression_v3.json",
+      "model": "models/logistic_regression_v3.joblib",
+      "test_proba": "output/probas/logistic_regression_v3.npy"
+    },
+    "knn": {
+      "tier": "tier1_single",
+      "result": "output/results/knn_v3.json",
+      "model": "models/knn_v3.joblib",
+      "test_proba": "output/probas/knn_v3.npy"
+    },
+    "random_forest": {
+      "tier": "tier2_ensemble",
+      "result": "output/results/random_forest_v3.json",
+      "model": "models/random_forest_v3.joblib",
+      "test_proba": "output/probas/random_forest_v3.npy"
+    },
+    "bagging": {
+      "tier": "tier2_ensemble",
+      "result": "output/results/bagging_v3.json",
+      "model": "models/bagging_v3.joblib",
+      "test_proba": "output/probas/bagging_v3.npy"
+    },
+    "adaboost": {
+      "tier": "tier2_ensemble",
+      "result": "output/results/adaboost_v3.json",
+      "model": "models/adaboost_v3.joblib",
+      "test_proba": "output/probas/adaboost_v3.npy"
+    },
+    "xgboost": {
+      "tier": "tier2_ensemble",
+      "result": "output/results/xgboost_v3.json",
+      "model": "models/xgboost_v3.joblib",
+      "test_proba": "output/probas/xgboost_v3.npy"
+    },
+    "lightgbm": {
+      "tier": "tier2_ensemble",
+      "result": "output/results/lightgbm_v3.json",
+      "model": "models/lightgbm_v3.joblib",
+      "test_proba": "output/probas/lightgbm_v3.npy"
+    },
+    "voting": {
+      "tier": "tier3_meta",
+      "result": "output/results/voting_v3.json",
+      "model": "models/voting_v3.joblib",
+      "test_proba": "output/probas/voting_v3.npy"
+    },
+    "stacking": {
+      "tier": "tier3_meta",
+      "result": "output/results/stacking_v3.json",
+      "model": "models/stacking_v3.joblib",
+      "test_proba": "output/probas/stacking_v3.npy"
+    }
+  },
+  "comparison_csv": "output/model_comparison_v3.csv",
+  "shap_summary": "output/shap_summary_v3.png"
+}

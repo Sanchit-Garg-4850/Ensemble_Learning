@@ -1,0 +1,14 @@
+{
+  "train": {
+    "status": "success",
+    "seconds": 846.8
+  },
+  "decision_surfaces": {
+    "status": "success",
+    "seconds": 2.7
+  },
+  "shap_explain": {
+    "status": "success",
+    "seconds": 3.1
+  }
+}
