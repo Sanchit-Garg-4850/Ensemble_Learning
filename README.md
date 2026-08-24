@@ -11,7 +11,7 @@ strategy, full MLflow experiment tracking, a CI/CD pipeline that
 auto-promotes the best model, and an interactive Streamlit app for
 exploring the results.
 
-**Live demo:** (https://ensemblelearning-7twystgmwcga9x5xl9zhkb.streamlit.app/)
+**Live demo:** [Streamlit app](https://ensemblelearning-7twystgmwcga9x5xl9zhkb.streamlit.app/)
 **Experiment tracking:** [DagsHub MLflow dashboard](https://dagshub.com/Sanchit-Garg-4850/fraud-detection-experiment-tracking.mlflow)
 
 ---
@@ -20,15 +20,24 @@ exploring the results.
 
 | Model | Tier | PR-AUC | ROC-AUC |
 |---|---|---|---|
-| **XGBoost (tuned)** | Bagging/Boosting | **0.822** | **0.974** |
-| Voting (soft) | Meta-ensemble | 0.819 | — |
-| ... | ... | ... | ... |
-| Logistic Regression (baseline) | Single learner | 0.677 | — |
+| **XGBoost (tuned)** | Bagging/Boosting | **0.8336** | **0.9684** |
+| LightGBM | Bagging/Boosting | 0.8207 | 0.9661 |
+| Voting (soft) | Meta-ensemble | 0.8116 | 0.9776 |
+| Stacking | Meta-ensemble | 0.8069 | 0.9774 |
+| Bagging | Bagging/Boosting | 0.7824 | 0.9672 |
+| Random Forest | Bagging/Boosting | 0.7788 | 0.9773 |
+| KNN | Single learner | 0.7776 | 0.9103 |
+| Logistic Regression (baseline) | Single learner | 0.6688 | 0.9630 |
+| AdaBoost | Bagging/Boosting | 0.6639 | 0.9677 |
+| Decision Tree | Single learner | 0.6418 | 0.8942 |
 
-XGBoost was the top performer, outperforming the weakest baseline
-(Logistic Regression) by a wide margin — confirming the value of
-ensembling on severely imbalanced data. See the [Streamlit app](#) for the
-full model comparison, decision surfaces, and SHAP explainability.
+XGBoost was the top performer, outperforming the weakest single learner
+(Decision Tree, 0.6418 PR-AUC) by a wide margin — confirming the value of
+ensembling on severely imbalanced data. Every ensemble tier beats every
+single learner on PR-AUC, and the two boosting models (XGBoost, LightGBM)
+edge out the Voting/Stacking meta-ensembles built on top of them. See the
+[Streamlit app](https://ensemblelearning-7twystgmwcga9x5xl9zhkb.streamlit.app/)
+for the full model comparison, decision surfaces, and SHAP explainability.
 
 ---
 
@@ -173,7 +182,3 @@ so the test suite needs no real data.
   run routinely.
 - **EDA lives in a notebook, not a pipeline stage** — it's exploratory and
   narrative, not something a downstream stage consumes as an artifact.
-
-## License
-
-MIT (or your preferred license — update this section).
