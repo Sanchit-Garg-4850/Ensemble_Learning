@@ -18,8 +18,8 @@ from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
-from decision_surfaces import get_or_build_surface
-from config import TIERS, OUTPUT_DIR as _OUTPUT_DIR, RUN_VERSION
+from decision_surfaces import get_or_build_surface  # noqa: E402
+from config import TIERS, OUTPUT_DIR as _OUTPUT_DIR, RUN_VERSION  # noqa: E402
 
 OUTPUT_DIR = _OUTPUT_DIR
 SHADOW_CAPABLE_MODELS = set(TIERS["tier1_single"]) | set(TIERS["tier2_ensemble"])
@@ -259,4 +259,3 @@ with tab_threshold:
         c3.metric("F1", f"{f1_score(y_true, pred, zero_division=0):.3f}")
         st.write("Confusion matrix (rows=actual, cols=predicted)")
         st.dataframe(pd.DataFrame(cm, index=["normal", "fraud"], columns=["pred_normal", "pred_fraud"]))
-        
